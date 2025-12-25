@@ -1,0 +1,17 @@
+name = "fm2024"
+version = "0.1.0"
+keywords = ["math"]
+defaultTargets = ["Fm2024"]
+
+[leanOptions]
+pp.unicode.fun = true # pretty-prints `fun a ↦ b`
+relaxedAutoImplicit = false
+weak.linter.mathlibStandardSet = true
+maxSynthPendingDepth = 3
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+
+[[lean_lib]]
+name = "Fm2024"
