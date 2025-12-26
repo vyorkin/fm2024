@@ -19,14 +19,16 @@ A term of type `set X` can be thought of in four ways:
 1) A set of elements of `X` (i.e. a set of elements all of which have type `X`);
 2) A subset of `X`;
 3) An element of the power set of `X`;
-4) A function from `X` to `Prop` (sending the elements of `A` to `True` and the other ones to `False`)
+4) A function from `X` to `Prop` (sending the elements
+   of `A` to `True` and the other ones to `False`)
 
-So `Set X` could have been called `Subset X` or `Powerset X`; I guess they chose `Set X`
-because it was the shortest.
+So `Set X` could have been called `Subset X` or `Powerset X`;
+I guess they chose `Set X` because it was the shortest.
 
-Note that `X` is a type, but if `A` is a subset of `X` then `A` is a *term*; the type of `A` is `Set X`.
-This means that `a : A` doesn't make sense. What we say instead is `a : X` and `a ∈ A`.
-Of course `a ∈ A` is a true-false statement, so `a ∈ A : Prop`.
+Note that `X` is a type, but if `A` is a subset of `X` then `A` is a *term*;
+the type of `A` is `Set X`. This means that `a : A` doesn't make sense.
+What we say instead is `a : X` and `a ∈ A`. Of course `a ∈ A` is
+a true-false statement, so `a ∈ A : Prop`.
 
 All the sets `A`, `B`, `C` etc we consider will be subsets of `X`.
 If `x : X` then `x` may or may not be an element of `A`, `B`, `C`,
@@ -78,20 +80,51 @@ Let's prove some theorems.
 
 -/
 
-example : A ⊆ A := by sorry
+example : A ⊆ A := by
+  rw [subset_def]
+  intro x
+  exact id
 
-example : A ⊆ B → B ⊆ C → A ⊆ C := by sorry
+example : A ⊆ A := by rfl
 
-example : A ⊆ A ∪ B := by sorry
+example : A ⊆ B → B ⊆ C → A ⊆ C := by
+  repeat rw [subset_def]
+  intro hab hbc x hxinA
+  exact hbc x (hab x hxinA)
 
-example : A ∩ B ⊆ A := by sorry
+example : A ⊆ B → B ⊆ C → A ⊆ C := by
+  intro hab hbc x hxa
+  exact hbc (hab hxa)
 
-example : A ⊆ B → A ⊆ C → A ⊆ B ∩ C := by sorry
+example : A ⊆ A ∪ B := by
+  intro x hxa
+  left
+  exact hxa
 
-example : B ⊆ A → C ⊆ A → B ∪ C ⊆ A := by sorry
+example : A ∩ B ⊆ A := by
+  intro x hxab
+  exact hxab.1
 
-example : A ⊆ B → C ⊆ D → A ∪ C ⊆ B ∪ D := by sorry
+example : A ⊆ B → A ⊆ C → A ⊆ B ∩ C := by
+  intro hab hac x hxa
+  exact ⟨hab hxa, hac hxa⟩
 
-example : A ⊆ B → C ⊆ D → A ∩ C ⊆ B ∩ D := by sorry
+example : B ⊆ A → C ⊆ A → B ∪ C ⊆ A := by
+  intro hba hca x hxbc
+  rcases hxbc with hxb | hxc
+  · exact hba hxb
+  · exact hca hxc
+
+example : A ⊆ B → C ⊆ D → A ∪ C ⊆ B ∪ D := by
+  intro hab hcd x hxac
+  rcases hxac with hxa | hxc
+  · left
+    exact hab hxa
+  · right
+    exact hcd hxc
+
+example : A ⊆ B → C ⊆ D → A ∩ C ⊆ B ∩ D := by
+  intro hab hcd x ⟨hxa, hxd⟩
+  exact ⟨hab hxa, hcd hxd⟩
 
 end S04Sh01
