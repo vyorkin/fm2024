@@ -154,6 +154,6 @@ example (f : X → Y) (g : Y → Z) : Surjective (g ∘ f) → Surjective g :=
   obtain ⟨x, hx⟩ := h z
   rw [comp_eval] at hx
   rw [← hx]
-  use f x
+  use (f x)
 
 end S03Sh01

@@ -87,7 +87,7 @@ def f : X → ℕ
   | b => 42
   | c => 0
 
-example : f a = 37 := by-- true by definition
+example : f a = 37 := by -- true by definition
   rfl
 
 -- Here is a proof that `f` is an injective function.

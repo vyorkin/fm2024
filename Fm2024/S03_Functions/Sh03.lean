@@ -54,25 +54,57 @@ theorem Yb_ne_Yc : Y.b ≠ Y.c := by
 
 -- no cases when they're equal!
 theorem gYb_eq_gYc : g Y.b = g Y.c := by
-  sorry
+  cases g Y.b
+  show Z.d = Z.d
+  rfl
 
 open Function
 
 theorem gf_injective : Injective (g ∘ f) := by
-  sorry
+  intro x1 x2 h
+  cases x1; cases x2
+  rfl
 
 -- This is a question on the IUM (Imperial introduction to proof course) function problem sheet.
 -- Recall that if you have a hypothesis of the form `h : ∀ A, ...`, then `specialize h X`
 -- will specialize `h` to the specific case `A = X`.
 example : ¬∀ A B C : Type, ∀ (φ : A → B) (ψ : B → C), Injective (ψ ∘ φ) → Injective ψ := by
-  sorry
+  intro h
+  specialize h X Y Z
+  specialize h f g
+  specialize h gf_injective
+  unfold Injective at h
+  specialize h gYb_eq_gYc
+  have h' := Yb_ne_Yc
+  contradiction
+
+example : ¬∀ A B C : Type, ∀ (φ : A → B) (ψ : B → C), Injective (ψ ∘ φ) → Injective ψ := by
+  intro h
+  specialize h X Y Z f g gf_injective gYb_eq_gYc
+  contradiction
 
 -- Below is another one. Let's make a sublemma first.
 theorem gf_surjective : Surjective (g ∘ f) := by
-  sorry
+  intro z
+  use X.a
 
 -- Another question from IUM
 example : ¬∀ A B C : Type, ∀ (φ : A → B) (ψ : B → C), Surjective (ψ ∘ φ) → Surjective φ := by
-  sorry
+  intro h
+  specialize h X Y Z
+  specialize h f g
+  specialize h gf_surjective
+  unfold Surjective at h
+  obtain ⟨x, hx⟩ := h Y.c
+  cases x
+  rw [f] at hx
+  have hne := Yb_ne_Yc
+  contradiction
+
+example : ¬∀ A B C : Type, ∀ (φ : A → B) (ψ : B → C), Surjective (ψ ∘ φ) → Surjective φ := by
+  intro h
+  specialize h X Y Z f g gf_surjective
+  obtain ⟨x, hx⟩ := h Y.c
+  contradiction
 
 end Sh03
