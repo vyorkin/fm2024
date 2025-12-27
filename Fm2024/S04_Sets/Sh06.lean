@@ -40,27 +40,76 @@ for group theory. In Lean we use the notation `f ⁻¹' T` for this pullback.
 
 variable (X Y : Type) (f : X → Y) (S : Set X) (T : Set Y)
 
-example : S ⊆ f ⁻¹' (f '' S) := by sorry
+example : S ⊆ f ⁻¹' (f '' S) := by
+  intro x hxs
+  rw [Set.image, Set.preimage]
+  use x, hxs -- x ∈ {x | f x ∈ {x | f x = x}}
 
-example : f '' (f ⁻¹' T) ⊆ T := by sorry
+example : f '' (f ⁻¹' T) ⊆ T := by
+  rw [Set.image]
+  intro y ⟨x, hx, hxeq⟩
+  rw [Set.preimage] at hx
+  rw [← hxeq]
+  exact hx
 
 -- `library_search` will do this but see if you can do it yourself.
-example : f '' S ⊆ T ↔ S ⊆ f ⁻¹' T := by sorry
+example : f '' S ⊆ T ↔ S ⊆ f ⁻¹' T := by
+  constructor
+  · intro h x xs
+    exact h ⟨x, xs, rfl⟩
+  · intro hs y ⟨x, xs, hxeq⟩
+    rw [← hxeq]
+    exact hs xs
 
 -- Pushforward and pullback along the identity map don't change anything
 -- pullback is not so hard
-example : id ⁻¹' S = S := by sorry
+example : id ⁻¹' S = S := by
+  rw [Set.preimage]
+  simp
 
 -- pushforward is a little trickier. You might have to `ext x, split`.
-example : id '' S = S := by sorry
+example : id '' S = S := by
+  ext x
+  constructor
+  · rintro ⟨x, hxs, rfl⟩
+    assumption
+  · intro h
+    use x
+    constructor
+    · exact h
+    · rfl
 
 -- Now let's try composition.
 variable (Z : Type) (g : Y → Z) (U : Set Z)
 
 -- preimage of preimage is preimage of comp
-example : g ∘ f ⁻¹' U = f ⁻¹' (g ⁻¹' U) := by sorry
+example : g ∘ f ⁻¹' U = f ⁻¹' (g ⁻¹' U) := by
+  ext x
+  constructor
+  · intro h
+    unfold Function.comp at *
+    repeat rw [Set.preimage] at *
+    exact h
+  · intro h; exact h
 
--- preimage of preimage is preimage of comp
-example : g ∘ f '' S = g '' (f '' S) := by sorry
+example : g ∘ f ⁻¹' U = f ⁻¹' (g ⁻¹' U) := by rfl
+
+example : g ∘ f '' S = g '' (f '' S) := by
+  ext x; constructor
+  · intro ⟨x, hxs, hxeq⟩
+    unfold Set.image at *
+    unfold Function.comp at hxeq
+    rw [← hxeq]
+    use f x
+    constructor
+    · use x, hxs
+    · rfl
+  · rintro ⟨x, his, rfl⟩
+    obtain ⟨y, hys, hyeq⟩ := his
+    unfold Set.image
+    use y
+    rw [← hyeq]
+    rw [Function.comp]
+    exact ⟨hys, rfl⟩
 
 end S04Sh06

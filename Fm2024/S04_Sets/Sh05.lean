@@ -37,24 +37,104 @@ variable (X : Type)
   (x y z : X)
 
 -- x,y,z are elements of `X` or, more precisely, terms of type `X`
-example : A ∪ A = A := by sorry
+example : A ∪ A = A := by
+  ext x; constructor
+  · rintro (hxa | hxa) <;> assumption
+  · intro hxa; left; assumption
 
-example : A ∩ A = A := by sorry
+example : A ∩ A = A := by
+  ext x; constructor
+  · intro ⟨hl, hr⟩
+    assumption
+  · intro ha
+    exact ⟨ha, ha⟩
 
-example : A ∩ ∅ = ∅ := by sorry
+example : A ∩ ∅ = ∅ := by
+  ext x; constructor
+  · rintro ⟨ha, he⟩
+    assumption
+  · intro he
+    tauto
 
-example : A ∪ univ = univ := by sorry
+example : A ∪ univ = univ := by simp
 
-example : A ⊆ B → B ⊆ A → A = B := by sorry
+example : A ⊆ B → B ⊆ A → A = B := by
+  intro hab hba
+  ext x
+  constructor
+  · intro hxa
+    exact hab hxa
+  · intro hxb
+    exact hba hxb
 
-example : A ∩ B = B ∩ A := by sorry
+example : A ∩ B = B ∩ A := by
+  ext x
+  constructor
+  · rintro ⟨hxa, hxb⟩
+    exact ⟨hxb, hxa⟩
+  · rintro ⟨hxb, hxa⟩
+    exact ⟨hxa, hxb⟩
 
-example : A ∩ (B ∩ C) = A ∩ B ∩ C := by sorry
+example : A ∩ B = B ∩ A :=
+  Subset.antisymm
+  (fun _ ⟨hxa, hxb⟩ ↦ ⟨hxb, hxa⟩ )
+  (fun _ ⟨hxb, hxa⟩ ↦ ⟨hxa, hxb⟩)
 
-example : A ∪ (B ∪ C) = A ∪ B ∪ C := by sorry
+example : A ∩ (B ∩ C) = A ∩ B ∩ C :=
+  Subset.antisymm
+  (fun _ ⟨hxa, ⟨hxb, hxc⟩⟩ ↦ ⟨⟨hxa, hxb⟩, hxc⟩)
+  (fun _ ⟨⟨hxa, hxb⟩, hxc⟩ ↦ ⟨hxa, ⟨hxb, hxc⟩⟩)
 
-example : A ∪ B ∩ C = (A ∪ B) ∩ (A ∪ C) := by sorry
+example : A ∪ (B ∪ C) = A ∪ B ∪ C := by
+  ext x; constructor
+  · rintro (hxa | (hxb | hxc))
+    · left; left; exact hxa
+    · left; right; exact hxb
+    · right; exact hxc
+  · rintro ((hxa | hxb) | hxc)
+    · left; exact hxa
+    · right; left; exact hxb
+    · right; right; exact hxc
 
-example : A ∩ (B ∪ C) = A ∩ B ∪ A ∩ C := by sorry
+example : A ∪ B ∩ C = (A ∪ B) ∩ (A ∪ C) :=
+  Subset.antisymm
+    (fun x (hab : x ∈ A ∪ (B ∩ C)) =>
+      Or.elim hab
+        (fun ha => ⟨Or.inl ha, Or.inl ha⟩)
+        (fun ⟨hb, hc⟩ => ⟨Or.inr hb, Or.inr hc⟩))
+    (fun _ ⟨hab, hac⟩ =>
+      Or.elim hab
+        (fun ha => Or.inl ha)
+        (fun hb =>
+          Or.elim hac
+            (fun ha => Or.inl ha)
+            (fun hc => Or.inr ⟨hb, hc⟩)))
+
+example : A ∪ B ∩ C = (A ∪ B) ∩ (A ∪ C) := by
+  ext x
+  constructor
+  · rintro (ha | ⟨hb, hc⟩)
+    · exact ⟨Or.inl ha, Or.inl ha⟩
+    · exact ⟨Or.inr hb, Or.inr hc⟩
+  · rintro ⟨hab, hac⟩
+    show x ∈ A ∪ (B ∩ C)
+    rcases hab with ha | hb
+    · left
+      exact ha
+    · rcases hac with ha | hc
+      · left
+        exact ha
+      · right
+        exact ⟨hb, hc⟩
+
+example : A ∩ (B ∪ C) = A ∩ B ∪ A ∩ C := by
+  ext x
+  constructor
+  · rintro ⟨ha, hb | hc⟩
+    · exact Or.inl ⟨ha, hb⟩
+    · exact Or.inr ⟨ha, hc⟩
+  · rintro (⟨ha, hb⟩ | ⟨ha, hc⟩)
+    · exact ⟨ha, Or.inl hb⟩
+    · exact ⟨ha, Or.inr hc⟩
 
 end S04Sh05
