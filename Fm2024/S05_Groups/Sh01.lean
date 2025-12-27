@@ -43,7 +43,7 @@ example (g : G) : g⁻¹ * g = 1 :=
     of Lean's "type class inference system". The type class inference system
     is the system which deals with stuff in square brackets. You don't have
     to worry about it right now -- all that matters is that you have access
-    to all the group axioms. This one is called `inv_mul_self g`.
+    to all the group axioms. This one is called `inv_mul_cancel g`.
 -/
   inv_mul_cancel g
 
@@ -53,18 +53,18 @@ example (g : G) : g⁻¹ * g = 1 :=
 -- with the name of the axiom it found. Note also that you can instead *guess*
 -- the names of the axioms. For example what do you think the proof of `1 * a = a` is called?
 example (a b c : G) : a * b * c = a * (b * c) := by
-  sorry
+  exact mul_assoc a b c
 
 -- can be found with `library_search` if you didn't know the answer already
 example (a : G) : a * 1 = a := by
-  sorry
+  exact mul_one a
 
 -- Can you guess the last two?
 example (a : G) : 1 * a = a := by
-  sorry
+  exact one_mul a
 
 example (a : G) : a * a⁻¹ = 1 := by
-  sorry
+  exact mul_inv_cancel a
 
 -- As well as the axioms, Lean has many other standard facts which are true
 -- in all groups. See if you can prove these from the axioms, or find them
@@ -73,26 +73,39 @@ example (a : G) : a * a⁻¹ = 1 := by
 variable (a b c : G)
 
 example : a⁻¹ * (a * b) = b := by
-  sorry
+  rw [← mul_assoc]
+  rw [inv_mul_cancel]
+  rw [one_mul]
 
 example : a * (a⁻¹ * b) = b := by
-  sorry
+  rw [← mul_assoc]
+  rw [mul_inv_cancel]
+  rw [one_mul]
 
 example {a b c : G} (h1 : b * a = 1) (h2 : a * c = 1) : b = c := by
   -- hint for this one if you're doing it from first principles: `b * (a * c) = (b * a) * c`
-  sorry
+  rw [← mul_one c, ← h1]
+  nth_rw 1 [← mul_one b, ← h2]
+  rw [← mul_assoc]
+  rw [h1]
+  rw [mul_one, one_mul]
+
 
 example : a * b = 1 ↔ a⁻¹ = b := by
-  sorry
+  constructor
+  · intro h
+    rw [← one_mul b, ← inv_mul_cancel a, mul_assoc, h, mul_one]
+  · intro h
+    rw [← mul_inv_cancel a, h]
 
 example : (1 : G)⁻¹ = 1 := by
-  sorry
+  exact inv_one
 
 example : a⁻¹⁻¹ = a := by
-  sorry
+  exact inv_inv a
 
 example : (a * b)⁻¹ = b⁻¹ * a⁻¹ := by
-  sorry
+  exact mul_inv_rev a b
 
 /-
 
@@ -108,10 +121,19 @@ try and prove the next example manually by rewriting with the lemmas above
 educated guessing).
 
 -/
-example : (b⁻¹ * a⁻¹)⁻¹ * 1⁻¹⁻¹ * b⁻¹ * (a⁻¹ * a⁻¹⁻¹⁻¹) * a = 1 := by group
+example : (b⁻¹ * a⁻¹)⁻¹ * 1⁻¹⁻¹ * b⁻¹ * (a⁻¹ * a⁻¹⁻¹⁻¹) * a = 1 := by
+  group
 
 -- Try this trickier problem: if g^2=1 for all g in G, then G is abelian
 example (h : ∀ g : G, g * g = 1) : ∀ g h : G, g * h = h * g := by
-  sorry
+  intro x y
+  have hi : ∀ g : G, g = g⁻¹ := by
+    intro g
+    nth_rw 1 [← mul_one g]
+    rw [← mul_inv_cancel g, ← mul_assoc]
+    rw [h, one_mul]
+  rw [hi (x * y)]
+  rw [mul_inv_rev]
+  rw [← hi x, ← hi y]
 
 end S05Sh01
