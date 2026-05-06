@@ -5,7 +5,7 @@ Author : Kevin Buzzard
 -/
 import Mathlib.Tactic -- imports all the Lean tactics
 
-namespace Sh03
+namespace Sh02
 
 /-!
 
@@ -102,4 +102,4 @@ example : Function.Injective f := by
   -- 6 goals left
   all_goals cases h -- no cases :-)
 
-end Sh03
+end Sh02
